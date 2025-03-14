@@ -1,5 +1,6 @@
 import axios from "axios";
-import { analyzeDiff, generateLogicalFlow } from "./ai"; // AI-based logical flow generation
+import { analyzeDiff } from "./ai"; // AI-based logical flow generation
+// import { generateLogicalFlow } from "./ai";
 import { postFeedback } from "./feedback";
 
 export async function processPR(prUrl: string): Promise<void> {
@@ -37,16 +38,30 @@ export async function processPR(prUrl: string): Promise<void> {
     // Generate Mermaid diagrams
     const changeFlowchart = generateChangeFlowchart(changes);
     console.log("Change Flowchart:", changeFlowchart);
-    const logicalFlowchart = await generateLogicalFlow(changes); // AI-based logical diagram
-    console.log("Logical Flowchart:", logicalFlowchart);
+    // const logicalFlowchart = await generateLogicalFlow(changes); // AI-based logical diagram
+    // console.log("Logical Flowchart:", logicalFlowchart);
 
     // Post feedback with AI analysis & diagrams
-    await postFeedback(
+    // const feedBackData = await postFeedback(
+    //   prUrl,
+    //   `### PR Analysis\n\n${feedback}\n\n### Change Flowchart\n\`\`\`mermaid\n${changeFlowchart}\n\`\`\`\n\n### Logical Flow\n\`\`\`mermaid\n${logicalFlowchart}\n\`\`\``
+    // );
+
+    // const feedBackData = await postFeedback(
+    //   prUrl,
+    //   `### PR Analysis\n\n${feedback}\n\n### Change Flowchart\n\`\`\`mermaid\n${changeFlowchart}\n\`\`\`\n\n### Logical Flow\n\`\`\`mermaid\n${logicalFlowchart}\n\`\`\``
+    // );
+
+    const feedBackData = await postFeedback(
       prUrl,
-      `### PR Analysis\n\n${feedback}\n\n### Change Flowchart\n\`\`\`mermaid\n${changeFlowchart}\n\`\`\`\n\n### Logical Flow\n\`\`\`mermaid\n${logicalFlowchart}\n\`\`\``
+      `### PR Analysis\n\n${feedback}\n\n### Change Flowchart\n\`\`\`mermaid\n${changeFlowchart}\n\`\`\`\n\n`
     );
+
+    console.log("Feedback posted:", feedBackData);
+    return feedBackData;
   } catch (error) {
     console.error("PR processing failed:", "Error:", error);
+    console.error(JSON.stringify(error, null, 2));
   }
 }
 
@@ -68,7 +83,7 @@ function parseDiff(
 
       // Detect file changes
       if (line.startsWith("diff --git")) {
-        const match = line.match(/b\/(.+)/); // Improved regex for filenames
+        const match = line.match(/b\/(.+)/); // Extract filename from diff line
         if (match) {
           currentFile = match[1].trim();
         } else {
@@ -78,7 +93,7 @@ function parseDiff(
         }
       }
 
-      // Detect added lines (ignoring file metadata changes)
+      // Detect added lines (ignoring metadata changes)
       else if (line.startsWith("+") && !line.startsWith("+++")) {
         if (currentFile) {
           const addedLine = line.slice(1).trim();
@@ -94,7 +109,7 @@ function parseDiff(
         }
       }
 
-      // Detect removed lines (ignoring file metadata changes)
+      // Detect removed lines (ignoring metadata changes)
       else if (line.startsWith("-") && !line.startsWith("---")) {
         if (currentFile) {
           const removedLine = line.slice(1).trim();

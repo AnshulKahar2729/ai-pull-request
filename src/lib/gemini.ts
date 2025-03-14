@@ -12,7 +12,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
  */
 export async function generateAIContent(
   prompt: string,
-  modelId: string = "gemini-pro",
+  modelId: string = "gemini-2.0-flash",
 ): Promise<string> {
   try {
     // Load the AI model

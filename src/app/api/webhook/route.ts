@@ -64,13 +64,18 @@ export async function POST(req: NextRequest) {
       await handleComment(body); // Chat handler
     }
 
-    return NextResponse.json({ data: {
-      message: "Webhook processed successfully",
-      secret : secret,
-      signature: signature,
-      hmac: hmac,
-      event: event,
-    } }, { status: 200 });
+    return NextResponse.json(
+      {
+        data: {
+          message: "Webhook processed successfully",
+          secret: secret,
+          signature: signature,
+          hmac: hmac,
+          event: event,
+        },
+      },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Webhook processing error:", error);
     return NextResponse.json(
